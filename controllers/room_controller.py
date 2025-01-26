@@ -44,7 +44,7 @@ def join_room():
     """
     Присоединение к комнате
     ---
-    description: Войти в комнату с количеством, заданным пользователем.
+    description: Войти в комнату нужного размера (room_size).
     tags:
       - Rooms
     security:
@@ -64,14 +64,24 @@ def join_room():
     responses:
       200:
         description: Успешное присоединение к существующей комнате
+        schema:
+          $ref: '#/definitions/MessageResponse'
       201:
         description: Создана новая комната
+        schema:
+          $ref: '#/definitions/MessageResponse'
       400:
         description: Пользователь уже в комнате
+        schema:
+          $ref: '#/definitions/ErrorResponse'
       403:
         description: Пользователь заблокирован
+        schema:
+          $ref: '#/definitions/ErrorResponse'
       404:
-        description: Нет подходящих комнат или пользователь не найден
+        description: Нет подходящей комнаты или пользователь не найден
+        schema:
+          $ref: '#/definitions/ErrorResponse'
     """
     logger.debug(f"Joining room (PID: {os.getpid()})")
     user_ = get_current_user()
@@ -103,7 +113,7 @@ def leave_room():
     """
     Выход из комнаты
     ---
-    description: Выход из комнаты пользователем.
+    description: Пользователь покидает комнату, если он в ней.
     tags:
       - Rooms
     security:
@@ -111,12 +121,20 @@ def leave_room():
     responses:
       200:
         description: Успешный выход из комнаты
+        schema:
+          $ref: '#/definitions/MessageResponse'
       400:
         description: Пользователь не в комнате
+        schema:
+          $ref: '#/definitions/ErrorResponse'
       403:
         description: Пользователь заблокирован
+        schema:
+          $ref: '#/definitions/ErrorResponse'
       404:
         description: Пользователь не найден
+        schema:
+          $ref: '#/definitions/ErrorResponse'
     """
     logger.debug("Leaving room")
     user_ = get_current_user()
@@ -134,16 +152,16 @@ def leave_room():
 @jwt_required()
 def my_room():
     """
-    Узнать, в какой комнате пользователь сейчас находится.
+    Моя комната
     ---
-    description: Узнать, в комнате ли пользователь, и если да, то дать её ключ.
+    description: Узнать, в какой комнате находится пользователь (если вообще).
     tags:
       - Rooms
     security:
       - bearerAuth: []
     responses:
       200:
-        description: Возвращает JSON с информацией о комнате
+        description: Возвращает информацию о комнате
         schema:
           type: object
           properties:
@@ -156,8 +174,12 @@ def my_room():
               example: "You are not in a room"
       403:
         description: Пользователь заблокирован
+        schema:
+          $ref: '#/definitions/ErrorResponse'
       404:
         description: Пользователь не найден
+        schema:
+          $ref: '#/definitions/ErrorResponse'
     """
     user_ = get_current_user()
     if not user_:
@@ -175,7 +197,7 @@ def room_messages(room_id):
     """
     Получение сообщений комнаты
     ---
-    description: Получение всех сообщений в комнате с того момента, как пользователь вошел в нее.
+    description: Получить все сообщения в заданной комнате (после времени входа пользователя).
     tags:
       - Rooms
     security:
@@ -186,16 +208,36 @@ def room_messages(room_id):
         required: true
         schema:
           type: string
-        description: Идентификатор комнаты
+        description: Идентификатор комнаты (например, "room:3:123456")
     responses:
       200:
-        description: Возвращает список сообщений (JSON)
+        description: Список сообщений в комнате
+        schema:
+          type: array
+          items:
+            type: object
+            properties:
+              user_id:
+                type: string
+                example: "user_12345678"
+              content:
+                type: string
+                example: "Hello!"
+              timestamp:
+                type: string
+                example: "2025-01-01T10:00:00+00:00"
       400:
         description: Пользователь не в комнате
+        schema:
+          $ref: '#/definitions/ErrorResponse'
       403:
         description: Пользователь заблокирован
+        schema:
+          $ref: '#/definitions/ErrorResponse'
       404:
         description: Пользователь не найден
+        schema:
+          $ref: '#/definitions/ErrorResponse'
     """
     logger.debug("Getting room messages")
     user_ = get_current_user()

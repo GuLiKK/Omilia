@@ -63,10 +63,16 @@ def register():
     responses:
       201:
         description: Успешная регистрация
+        schema:
+          $ref: '#/definitions/MessageResponse'
       400:
-        description: Ошибка валидации или уже существует пользователь
+        description: Ошибка валидации или пользователь уже существует
+        schema:
+          $ref: '#/definitions/ErrorResponse'
       403:
-        description: Пользователь заблокирован (редко бывает для регистрации, но оставляем для единообразия)
+        description: Пользователь заблокирован
+        schema:
+          $ref: '#/definitions/ErrorResponse'
     """
     logger.info("Attempting user registration")
     try:
@@ -89,7 +95,7 @@ def login():
     """
     Вход (логин)
     ---
-    description: Войти в аккаунт пользователя.
+    description: Войти в аккаунт пользователя (выдаёт access_token и refresh_token).
     tags:
       - Auth
     consumes:
@@ -102,13 +108,28 @@ def login():
           $ref: '#/definitions/LoginModel'
     responses:
       200:
-        description: Успешный вход (возвращаются access_token и refresh_token)
+        description: Успешный вход
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+              example: "Login successful"
+            access_token:
+              type: string
+              example: "eyJhbGciOi..."
       400:
         description: Неверные данные
+        schema:
+          $ref: '#/definitions/ErrorResponse'
       403:
         description: Пользователь заблокирован
+        schema:
+          $ref: '#/definitions/ErrorResponse'
       404:
-        description: Не найден пользователь
+        description: Пользователь не найден
+        schema:
+          $ref: '#/definitions/ErrorResponse'
     """
     logger.info("User login attempt")
     try:
@@ -158,12 +179,24 @@ def refresh():
     responses:
       200:
         description: Возвращает новый access-токен
+        schema:
+          type: object
+          properties:
+            access_token:
+              type: string
+              example: "eyJhbGciOi..."
       401:
         description: Недействительный refresh-токен
+        schema:
+          $ref: '#/definitions/ErrorResponse'
       403:
         description: Пользователь заблокирован
+        schema:
+          $ref: '#/definitions/ErrorResponse'
       404:
         description: Пользователь не найден
+        schema:
+          $ref: '#/definitions/ErrorResponse'
     """
     logger.debug("Attempting to refresh token")
     user_id = get_jwt_identity()
@@ -185,16 +218,20 @@ def logout():
     """
     Выход (логаут)
     ---
-    description: Выйти из аккаунта пользователя, пользователь также покидает комнату, если он в ней (сброс Refresh-токена).
+    description: Выйти из аккаунта (пользователь покидает комнату, сброс Refresh-токена).
     tags:
       - Auth
-    consumes:
-      - application/json
+    security:
+      - bearerAuth: []
     responses:
       200:
         description: Успешный выход
+        schema:
+          $ref: '#/definitions/MessageResponse'
       403:
         description: Пользователь заблокирован
+        schema:
+          $ref: '#/definitions/ErrorResponse'
     """
     logger.debug("Logging out")
 
@@ -213,7 +250,7 @@ def link_telegram():
     """
     Привязка Telegram ID
     ---
-    description: Привязать Telegram_id при входе в аккаунт в Telegram.
+    description: Привязать Telegram ID к учётной записи.
     tags:
       - Auth
     security:
@@ -229,16 +266,24 @@ def link_telegram():
           properties:
             telegram_id:
               type: string
-              example: "my_new_telegram_id"
+              example: "my_telegram_id"
     responses:
       200:
-        description: telegram_id привязан
+        description: Telegram ID успешно привязан
+        schema:
+          $ref: '#/definitions/MessageResponse'
       400:
         description: Ошибка валидации
+        schema:
+          $ref: '#/definitions/ErrorResponse'
       403:
         description: Пользователь заблокирован
+        schema:
+          $ref: '#/definitions/ErrorResponse'
       404:
-        description: Нет пользователя
+        description: Пользователь не найден
+        schema:
+          $ref: '#/definitions/ErrorResponse'
     """
     logger.debug("Linking telegram_id")
     user_ = get_current_user()
@@ -265,7 +310,7 @@ def change_username():
     """
     Смена юзернейма
     ---
-    description: Сменить имя пользователя.
+    description: Сменить username пользователя.
     tags:
       - Auth
     security:
@@ -284,13 +329,21 @@ def change_username():
               example: "my_new_username"
     responses:
       200:
-        description: username изменён
+        description: Username успешно изменён
+        schema:
+          $ref: '#/definitions/MessageResponse'
       400:
         description: Некорректные данные
+        schema:
+          $ref: '#/definitions/ErrorResponse'
       403:
         description: Пользователь заблокирован
+        schema:
+          $ref: '#/definitions/ErrorResponse'
       404:
         description: Пользователь не найден
+        schema:
+          $ref: '#/definitions/ErrorResponse'
     """
     logger.debug("Changing username")
     user_ = get_current_user()

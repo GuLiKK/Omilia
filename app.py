@@ -2,6 +2,7 @@ import os
 from flask import Flask
 from flasgger import Swagger
 from config.loader import load_config_yml
+from config.swagger import swagger_config, swagger_template
 from core.logging_setup import setup_logging
 from core.database import init_db, init_jwt, init_socketio #, init_redis
 from controllers.auth_controller import auth_bp
@@ -34,79 +35,6 @@ def create_app():
     init_db(app)
     init_jwt(app)
     # init_redis()  # Инициализация Redis до импорта Blueprint
-
-    swagger_config = {
-        "headers": [],
-        "specs": [
-            {
-                "endpoint": "apispec",
-                "route": "/apispec.json",
-                "rule_filter": lambda rule: True,
-                "model_filter": lambda tag: True,
-            }
-        ],
-        "static_url_path": "/flasgger_static",
-        "swagger_ui": True,
-        "specs_route": "/apidocs",
-    }
-
-    # Дополняем шаблон определением UserActionModel:
-    swagger_template = {
-        "info": {
-            "title": "Omilia",
-            "description": "Открытый API для анонимного чата",
-            "version": "0.2.0"
-        },
-        "basePath": "/",
-        "produces": ["application/json"],
-        "consumes": ["application/json"],
-        "definitions": {
-            "RegisterModel": {
-                "type": "object",
-                "properties": {
-                    "login": {"type": "string", "example": "my_login"},
-                    "password": {"type": "string", "example": "my_password"}
-                }
-            },
-            "LoginModel": {
-                "type": "object",
-                "properties": {
-                    "login": {"type": "string"},
-                    "password": {"type": "string"},
-                    "telegram_id": {"type": "string"}
-                }
-            },
-            "UserActionModel": {
-                "type": "object",
-                "properties": {
-                    "user_id": {"type": "integer", "example": 123}
-                }
-            },
-            "DemoteOrPromoteUserModel": {
-                "type": "object",
-                "properties": {
-                    "new_role": {
-                        "type": "string",
-                        "enum": ["user", "moderator"],
-                        "example": "moderator"
-                    },
-                    "user_id": {
-                        "type": "integer",
-                        "example": 123
-                    }
-                }
-            }
-        },
-        "securityDefinitions": {
-            "bearerAuth": {
-                "type": "apiKey",
-                "in": "header",
-                "name": "Authorization",
-                "description": "Введите <токен>"
-            }
-        }
-    }
-
 
     swagger = Swagger(
         app,

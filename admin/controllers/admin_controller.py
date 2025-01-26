@@ -20,16 +20,16 @@ logger = logging.getLogger(__name__)
 @is_admin_or_moderator
 def list_users():
     """
-    Получить список всех пользователей.
+    Получить список всех пользователей
     ---
-    description: Вывод списка всех пользователей (только с правами admin и moderator).
+    description: Вывод списка всех пользователей (доступно для admin и moderator).
     tags:
       - Admin
     security:
       - bearerAuth: []
     responses:
       200:
-        description: Список пользователей (JSON array).
+        description: Список пользователей (JSON array)
         schema:
           type: array
           items:
@@ -37,13 +37,18 @@ def list_users():
             properties:
               id:
                 type: integer
+                example: 1
                 description: Идентификатор пользователя
               login:
                 type: string
-                description: Логин пользователя
+                example: "user_login"
               username:
                 type: string
-                description: Отображаемое имя пользователя
+                example: "user_12345678"
+      403:
+        description: Недостаточно прав или пользователь заблокирован
+        schema:
+          $ref: '#/definitions/ErrorResponse'
     """
     logger.debug("Admin requested user list")
     users_data = list_all_users()
@@ -54,9 +59,9 @@ def list_users():
 @is_admin_or_moderator
 def block_user():
     """
-    Заблокировать пользователя.
+    Заблокировать пользователя
     ---
-    description: Заблокировать выбранного пользователя (только с правами admin и moderator).
+    description: Заблокировать выбранного пользователя (admin или moderator).
     tags:
       - Admin
     security:
@@ -72,10 +77,20 @@ def block_user():
     responses:
       200:
         description: Пользователь успешно заблокирован
+        schema:
+          $ref: '#/definitions/MessageResponse'
       400:
         description: Некорректные данные
+        schema:
+          $ref: '#/definitions/ErrorResponse'
+      403:
+        description: Недостаточно прав / пользователь заблокирован
+        schema:
+          $ref: '#/definitions/ErrorResponse'
       404:
         description: Пользователь не найден
+        schema:
+          $ref: '#/definitions/ErrorResponse'
     """
     logger.debug("Admin attempts to block user")
     try:
@@ -96,9 +111,9 @@ def block_user():
 @is_admin_or_moderator
 def unblock_user():
     """
-    Разблокировать пользователя.
+    Разблокировать пользователя
     ---
-    description: Разблокировать выбранного пользователя (только с правами admin и moderator).
+    description: Разблокировать выбранного пользователя (admin или moderator).
     tags:
       - Admin
     security:
@@ -114,10 +129,20 @@ def unblock_user():
     responses:
       200:
         description: Пользователь успешно разблокирован
+        schema:
+          $ref: '#/definitions/MessageResponse'
       400:
         description: Некорректные данные
+        schema:
+          $ref: '#/definitions/ErrorResponse'
+      403:
+        description: Недостаточно прав / пользователь заблокирован
+        schema:
+          $ref: '#/definitions/ErrorResponse'
       404:
         description: Пользователь не найден
+        schema:
+          $ref: '#/definitions/ErrorResponse'
     """
     logger.debug("Admin attempts to unblock user")
     try:
@@ -138,9 +163,9 @@ def unblock_user():
 @is_admin
 def promote_user():
     """
-    Повысить роль пользователя.
+    Повысить роль пользователя
     ---
-    description: Повысить роль выбранного пользователя до moderator или admin (только с правами admin).
+    description: Повысить роль пользователя (доступно только admin).
     tags:
       - Admin
     security:
@@ -155,11 +180,21 @@ def promote_user():
           $ref: '#/definitions/DemoteOrPromoteUserModel'
     responses:
       200:
-        description: Пользователь стал администратором
+        description: Пользователь успешно повышен
+        schema:
+          $ref: '#/definitions/MessageResponse'
       400:
         description: Некорректные данные
+        schema:
+          $ref: '#/definitions/ErrorResponse'
+      403:
+        description: Нет прав или пользователь заблокирован
+        schema:
+          $ref: '#/definitions/ErrorResponse'
       404:
         description: Пользователь не найден
+        schema:
+          $ref: '#/definitions/ErrorResponse'
     """
     logger.debug("Admin attempts to promote user to admin/moderator")
     try:
@@ -182,10 +217,9 @@ def promote_user():
 @is_admin
 def demote_user():
     """
-    Понизить роль пользователя.
+    Понизить роль пользователя
     ---
-    description: >
-      Понизить роль выбранного пользователя до moderator или user (только с правами admin).
+    description: Понизить роль пользователя (только для admin).
     tags:
       - Admin
     security:
@@ -200,13 +234,21 @@ def demote_user():
           $ref: '#/definitions/DemoteOrPromoteUserModel'
     responses:
       200:
-        description: Пользователь понижен
+        description: Роль пользователя успешно изменена
+        schema:
+          $ref: '#/definitions/MessageResponse'
       400:
         description: Некорректные данные
+        schema:
+          $ref: '#/definitions/ErrorResponse'
+      403:
+        description: Нет прав или пользователь заблокирован
+        schema:
+          $ref: '#/definitions/ErrorResponse'
       404:
         description: Пользователь не найден
-      403:
-        description: Недостаточно прав
+        schema:
+          $ref: '#/definitions/ErrorResponse'
     """
     logger.debug("Admin attempts to demote user")
     try:
