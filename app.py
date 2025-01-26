@@ -1,5 +1,4 @@
 import os
-import sys
 from flask import Flask
 from flasgger import Swagger
 from config.loader import load_config_yml
@@ -124,6 +123,14 @@ def create_app():
 
 app = create_app()
 socketio = init_socketio(app)
+
+@app.errorhandler(RuntimeError)
+def handle_runtime_error(e):
+    """
+    Глобальный обработчик RuntimeError
+    """
+    app.logger.error(f"RuntimeError: {str(e)}")
+    return {"error": "Internal server error"}, 500
 
 if __name__ == "__main__":
     app.logger.info(f"Omilia launched PID={os.getpid()}")
