@@ -1,0 +1,18 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Debug app.py directly",
+        "type": "debugpy",
+        "request": "launch",
+        "program": "app.py",
+        "args": [],
+        "console": "integratedTerminal",
+        "justMyCode": true,
+        "env": {
+          "FLASK_DEBUG": "0",
+          "FLASK_ENV": "production"
+        }
+      }
+    ]
+  }

@@ -1,0 +1,8 @@
+venv/
+logs/
+__pycache__/
+instance/chat.db
+config/config.yaml
+*.pyc
+**/__pycache__/
+admin/**/__pycache__
