@@ -35,22 +35,24 @@ def list_users():
           items:
             type: object
             properties:
+              username:
+                type: string
+                example: "user_12345678"
+                description: Имя пользователя
+              role:
+                type: string
+                example: "user"
+                description: Роль пользователя
               id:
                 type: integer
                 example: 1
                 description: Идентификатор пользователя
-              login:
-                type: string
-                example: "user_login"
-              username:
-                type: string
-                example: "user_12345678"
       403:
         description: Недостаточно прав или пользователь заблокирован
         schema:
           $ref: '#/definitions/ErrorResponse'
     """
-    logger.debug("Admin requested user list")
+    logger.debug("Admin/moderator requested user list")
     users_data = list_all_users()
     return jsonify(users_data)
 

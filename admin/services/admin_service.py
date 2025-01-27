@@ -10,7 +10,7 @@ def list_all_users():
     Возвращает список всех пользователей в формате list[dict].
     """
     users = User.query.all()
-    return [{"id": u.id, "login": u.login, "username": u.username} for u in users]
+    return [{"id": u.id, "role": u.role, "username": u.username} for u in users]
 
 def block_user(user_id: int):
     """
