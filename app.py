@@ -8,6 +8,7 @@ from core.database import init_db, init_jwt, init_socketio #, init_redis
 from controllers.auth_controller import auth_bp
 from controllers.room_controller import room_bp
 from admin.controllers.admin_controller import admin_bp
+import core.socket_manager
 
 def create_app():
     load_config_yml()  # Ставим env переменные

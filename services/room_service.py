@@ -1,7 +1,7 @@
 import logging
 import random
 from datetime import datetime
-from core.database import get_redis_client
+from core.database import get_redis_client, socketio
 from models.user import User
 
 logger = logging.getLogger(__name__)
@@ -11,15 +11,11 @@ def notify_room_users(room_id: str, message: str):
     Записывает уведомление всем пользователям комнаты (в список notifications в Redis).
     """
     try:
-
         r = get_redis_client()
         if r is None:
             raise RuntimeError("Cannot connect to Redis")
-        
-        users = r.smembers(f"{room_id}:users")
-        logger.debug(f"Notifying users in room {room_id}: {users}")
-        for uid in users:
-            r.rpush(f"{room_id}:notifications", message)
+        r.rpush(f"{room_id}:notifications", message)
+        socketio.emit("notification", {"message": message}, room=room_id)
     except Exception as e:
         logger.exception(f"Failed to notify users in room {room_id}: {e}")
 

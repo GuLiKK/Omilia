@@ -1,8 +1,7 @@
 import logging
 from flask import request
-from flask_socketio import emit
+from flask_socketio import emit, join_room
 from datetime import datetime, timezone
-
 from flask_jwt_extended import decode_token
 from flask_jwt_extended.exceptions import JWTExtendedException
 from .database import socketio, get_redis_client
@@ -15,28 +14,30 @@ logger = logging.getLogger(__name__)
 def handle_connect():
     token = request.args.get('token')
     if not token:
-        logger.warning("No token provided on connect")
-        return False
+        return False  # нет токена — не пускаем
 
     try:
         payload = decode_token(token)
         user_id = payload.get("sub")
         if user_id is None:
-            logger.warning("Invalid token payload on connect")
             return False
-
         user = User.query.get(user_id)
         if not user:
-            logger.warning("User not found for given token on connect")
             return False
 
         connected_users[user_id] = request.sid
+        # --- ДОБАВКА: смотрим, в какой room_id числится пользователь в Redis ---
+        r = get_redis_client()
+        room_id = r.hget(f"user:{user.id}", "room")  # например, "room:3:12345"
+        if room_id:
+            join_room(room_id)  # <-- теперь этот сокет реально зашёл в room_id
+            logger.info(f"User {user_id} joined Socket.IO room {room_id}")
+
         logger.info(f"User {user.login} connected via SocketIO (sid={request.sid})")
         return True
-    except JWTExtendedException:
-        logger.warning("Invalid token on connect")
-        return False
 
+    except JWTExtendedException:
+        return False
 @socketio.on('disconnect')
 def handle_disconnect():
     sid = request.sid
@@ -73,7 +74,7 @@ def handle_send_message(data):
         emit('error', {"error": "User not found"})
         return
     
-    r = get_redis_client
+    r = get_redis_client()
     if r is None:
         raise RuntimeError("Cannot connect to Redis")
     
@@ -90,10 +91,6 @@ def handle_send_message(data):
         return
 
     timestamp = datetime.now(timezone.utc).isoformat()
-    
-    r = get_redis_client
-    if r is None:
-        raise RuntimeError("Cannot connect to Redis")
     r.rpush(f"{room_id}:messages", f"{user.username}:{message}:{timestamp}")
 
     logger.info(f"User {user.login} sent message to room {room_id}")
