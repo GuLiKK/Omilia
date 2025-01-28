@@ -10,7 +10,7 @@ def setup_logging():
     """
     log_dir = "C:/Project/api/logs"
 
-    # Проверяем доступность (что диск существует)
+    # Проверяем существование диска
     drive = os.path.splitdrive(log_dir)[0]
     if drive and not os.path.exists(drive):
         raise FileNotFoundError(f"Drive not found: {drive}")

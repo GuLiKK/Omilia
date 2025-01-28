@@ -24,7 +24,7 @@ def init_jwt(app):
     # Включаем хранение refresh-токена в cookie
     app.config['JWT_TOKEN_LOCATION'] = ['cookies', 'headers']
     # Access-токен можно возвращать в теле ответа, refresh-токен в куки
-    # Для реального remember-me нужно, чтобы refresh-токен жил дольше
+    # Для реального remember-me требуется увеличить срок действия refresh-токена"
     app.config['JWT_HEADER_TYPE'] = ''
     app.config['JWT_COOKIE_SECURE'] = False   # Для HTTPS включить True
     app.config['JWT_COOKIE_SAMESITE'] = 'Strict'  # Или 'None'/'Lax'

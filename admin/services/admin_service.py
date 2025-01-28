@@ -35,7 +35,7 @@ def block_user(user_id: int):
     if room_id:
         # Пользователь в комнате -> выкидываем
         logger.info(f"User {user_id} is in room {room_id}, forcing leave_room")
-        _, _, _ = leave_room_service(user)  # игнорируем (room_id, error, status_code)
+        _, _, _ = leave_room_service(user)  # Возвращаем значение, игнорируя room_id, error, status_code
 
     return user
 
