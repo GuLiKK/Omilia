@@ -70,6 +70,34 @@ swagger_template = {
             "properties": {
                 "message": {"type": "string", "example": "Some success message"}
             }
+        },
+        "CreateComplaintModel": {
+            "type": "object",
+            "properties": {
+                "target_user_id": {
+                    "type": "integer",
+                    "example": 123
+                },
+                "message_id": {
+                    "type": "string",
+                    "example": "msg_12345"
+                },
+                "reason": {
+                    "type": "string",
+                    "example": "Spam or offensive content"
+                }
+            }
+        },
+        "ComplaintModel": {
+            "type": "object",
+            "properties": {
+                "complaint_id": {"type": "integer", "example": 1},
+                "reporter_id": {"type": "string", "example": "10"},
+                "target_user_id": {"type": "string", "example": "20"},
+                "message_id": {"type": "string", "example": "msg_12345"},
+                "reason": {"type": "string", "example": "Spam or offensive content"},
+                "created_at": {"type": "string", "example": "2025-01-01T10:00:00"}
+            }
         }
     },
 

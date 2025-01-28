@@ -8,6 +8,7 @@ from core.database import init_db, init_jwt, init_socketio #, init_redis
 from controllers.auth_controller import auth_bp
 from controllers.room_controller import room_bp
 from admin.controllers.admin_controller import admin_bp
+from controllers.complaint_controller import complaint_bp  
 import core.socket_manager
 
 def create_app():
@@ -47,6 +48,7 @@ def create_app():
     app.register_blueprint(auth_bp, url_prefix='/')
     app.register_blueprint(room_bp, url_prefix='/')
     app.register_blueprint(admin_bp, url_prefix='/')
+    app.register_blueprint(complaint_bp, url_prefix='/')
 
     return app
 

@@ -4,10 +4,10 @@ from logging.handlers import RotatingFileHandler
 
 def setup_logging():
     """
-    Настраивает логирование: создаёт папку logs/, файлы для debug и warning
-    с ротацией при достижении размера, в данном случае 5 мб.
+      1) debug_info.log — пишет уровни ниже WARNING (DEBUG и INFO).
+      2) error_critical.log — пишет уровни ERROR и CRITICAL.
+      3) admin_actions.log — отдельный лог для действий админов (WARNING).
     """
-    # Ставим путь к логам, меняем если нужно
     log_dir = "C:/Project/api/logs"
 
     # Проверяем доступность (что диск существует)
@@ -21,33 +21,51 @@ def setup_logging():
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
 
-    formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(message)s')
+    formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(name)s: %(message)s')
 
-    # debug_info: пишем только DEBUG и INFO (максимум INFO)
+    # 1) Логер: debug_info (DEBUG + INFO) -----
     debug_info_handler = RotatingFileHandler(
         os.path.join(log_dir, 'debug_info.log'),
-        maxBytes=5 * 1024 * 1024,  # 5 MB
-        backupCount=3,            # Храним до 3 старых файлов
-        encoding='utf-8'
-    )
-    debug_info_handler.setLevel(logging.DEBUG)
-    # Фильтр: если уровень >= WARNING, пусть летит в другой файл
-    def debug_filter(record: logging.LogRecord):
-        return record.levelno < logging.WARNING
-    debug_info_handler.addFilter(debug_filter)
-    debug_info_handler.setFormatter(formatter)
-
-    # warning_error_critical
-    warn_err_handler = RotatingFileHandler(
-        os.path.join(log_dir, 'warning_error_critical.log'),
         maxBytes=5 * 1024 * 1024,
         backupCount=3,
         encoding='utf-8'
     )
-    warn_err_handler.setLevel(logging.WARNING)
-    warn_err_handler.setFormatter(formatter)
+    debug_info_handler.setLevel(logging.DEBUG)
 
+    # Фильтр, чтобы отсечь WARNING и выше
+    def debug_info_filter(record: logging.LogRecord):
+        return record.levelno < logging.WARNING
+
+    debug_info_handler.addFilter(debug_info_filter)
+    debug_info_handler.setFormatter(formatter)
     logger.addHandler(debug_info_handler)
-    logger.addHandler(warn_err_handler)
+
+    # 2) Логер: error_critical (ERROR, CRITICAL) -----
+    error_critical_handler = RotatingFileHandler(
+        os.path.join(log_dir, 'error_critical.log'),
+        maxBytes=5 * 1024 * 1024,
+        backupCount=3,
+        encoding='utf-8'
+    )
+    error_critical_handler.setLevel(logging.ERROR)
+    error_critical_handler.setFormatter(formatter)
+    logger.addHandler(error_critical_handler)
+
+
+    # 3) Логгер для админских действий (admin_actions)
+    admin_logger = logging.getLogger("admin_actions")
+    admin_logger.setLevel(logging.WARNING)
+    admin_logger.propagate = False
+
+    admin_actions_handler = RotatingFileHandler(
+        os.path.join(log_dir, 'admin_actions.log'),
+        maxBytes=5 * 1024 * 1024,
+        backupCount=3,
+        encoding='utf-8'
+    )
+    admin_actions_handler.setLevel(logging.WARNING)
+    admin_actions_handler.setFormatter(formatter)
+
+    admin_logger.addHandler(admin_actions_handler)
 
     return logger

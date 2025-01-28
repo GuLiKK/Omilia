@@ -44,7 +44,7 @@ def init_socketio(app):
 def get_redis_client():
     """
     Возвращает подключение к Redis, 
-    при необходимости создаёт новое (хуета крч).
+    при необходимости создаёт новое.
     """
     global _redis_client
     if _redis_client is not None:
